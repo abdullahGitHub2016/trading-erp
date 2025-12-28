@@ -12,11 +12,26 @@ const isAuthenticated = computed(() => !!page.props.auth.user);
     <div class="min-h-screen bg-slate-50 flex">
 
         <aside v-if="isAuthenticated" class="w-64 bg-white border-r min-h-screen">
-            <nav class="p-4 space-y-2">
-                <Link href="/dashboard" class="block p-2 hover:bg-slate-100 rounded">Dashboard</Link>
-                <Link href="/products" class="block p-2 hover:bg-slate-100 rounded">Products</Link>
-            </nav>
-        </aside>
+    <nav class="p-4 space-y-2">
+        <Link href="/dashboard" class="block p-2 hover:bg-slate-100 rounded">Dashboard</Link>
+
+        <Link
+            v-if="page.props.auth.user.permissions.includes('product.view')"
+            href="/products"
+            class="block p-2 hover:bg-slate-100 rounded"
+        >
+            Products
+        </Link>
+
+        <Link
+            v-if="page.props.auth.user.roles.includes('Admin')"
+            href="/roles"
+            class="block p-2 hover:bg-slate-100 rounded text-blue-600 font-medium"
+        >
+            User Management
+        </Link>
+    </nav>
+</aside>
 
         <div class="flex-1">
             <header class="bg-white border-b h-16 flex items-center justify-between px-6">

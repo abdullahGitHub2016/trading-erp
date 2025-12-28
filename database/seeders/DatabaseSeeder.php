@@ -29,5 +29,9 @@ class DatabaseSeeder extends Seeder
             'category_id' => fn() => $categories->random()->id,
             'unit_id' => fn() => $units->random()->id,
         ]);
+
+        $this->call([
+        ErpRolePermissionSeeder::class, // Use the class constant
+    ]);
     }
 }

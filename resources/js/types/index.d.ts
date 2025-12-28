@@ -34,8 +34,11 @@ export interface User {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
+    roles: string[];      // Array of role names like ['Admin']
+    permissions: string[]; // Array of permission names like ['product.view']
     created_at: string;
     updated_at: string;
 }
+
 
 export type BreadcrumbItemType = BreadcrumbItem;
