@@ -17,9 +17,8 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::resource('products', ProductController::class)->middleware(['auth']);
+//Route::resource('products', ProductController::class)->middleware(['auth'])->middleware('permission:product.view');;
 
-/*
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', function () {
@@ -46,8 +45,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
 });
-
-*/
 
 
 
