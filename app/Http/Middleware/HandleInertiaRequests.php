@@ -46,9 +46,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user() ? [
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
-                    'roles' => $request->user()->getRoleNames(), // Pass roles to Vue
-                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
-                ] : null,
+// Use optional() or null-coalescing to prevent errors when logged out
+            'roles' => $request->user() ? $request->user()->getRoleNames() : [],
+            'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],                ] : null,
             ],
             'flash' => [
                 'message' => fn() => $request->session()->get('message'),

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Admin\RoleController;
 
 
 Route::get('/', function () {
@@ -47,5 +48,20 @@ Route::middleware(['auth'])->group(function () {
 });
 
 */
+
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Only users with the 'admin' role can access these routes
+    Route::middleware(['role:Admin'])->prefix('admin')->group(function () {
+        Route::post('/admin/roles/{role}/toggle', [RoleController::class, 'togglePermission'])->name('roles.toggle-permission');
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+// This handles the GET request to show the page
+    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+
+    // THIS IS THE MISSING PIECE: It handles the PUT request to update permissions
+    // The {role} parameter must match what you send from the frontend
+    Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');    });
+});
 
 require __DIR__.'/settings.php';
