@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { usePage, Link } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import {
     LayoutDashboard,
     Package,
@@ -12,10 +12,53 @@ import {
     X
 } from 'lucide-vue-next'; //
 
+import { ShoppingCart, ShoppingBag, ReceiptText } from 'lucide-vue-next';
+
 import Toast from '@/components/Toast.vue';
 
+// Define all possible keys that might come from Laravel
+interface FlashProps {
+    message?: string | null;
+    success?: string | null;
+    error?: string | null;
+}
+
 const page = usePage();
-const isExpanded = ref(false); // Default to collapsed
+const isExpanded = ref(true); // Default to collapsed
+
+const showToast = ref(false);
+const toastMessage = ref('');
+const toastType = ref('success'); // 'success' or 'error'
+
+// Watch for changes in the Inertia flash property
+watch(
+    // Cast the page props to our interface so TS knows 'success' exists
+    () => page.props.flash as unknown as FlashProps,
+    (flash: FlashProps) => {
+        // Now TS will allow flash.success
+        const messageToShow = flash.success || flash.message;
+
+        if (messageToShow) {
+            toastMessage.value = messageToShow;
+            toastType.value = 'success';
+            triggerToast();
+        } else if (flash.error) {
+            toastMessage.value = flash.error;
+            toastType.value = 'error';
+            triggerToast();
+        }
+    },
+    { deep: true, immediate: true }
+);
+
+function triggerToast() {
+    showToast.value = true;
+    // Automatically hide after 3 seconds
+    setTimeout(() => {
+        showToast.value = false;
+    }, 3000);
+}
+
 
 defineProps({
     show: Boolean,
@@ -78,6 +121,13 @@ const breadcrumbs = computed(() => {
                     <Package class="w-5 h-5 shrink-0" />
                     <span v-if="isExpanded" class="whitespace-nowrap">Products</span>
                 </Link>
+                <Link v-if="page.props.auth.user.permissions.includes('purchase.view')" href="/purchases"
+                    :class="[isUrlActive('/purchases') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+
+                    <ShoppingCart class="w-5 h-5 shrink-0" />
+
+                    <span v-if="isExpanded" class="whitespace-nowrap">Purchases</span>
+                </Link>
 
                 <Link v-if="page.props.auth.user.roles.includes('Admin')" href="/admin/roles"
                     :class="[isUrlActive('/admin/roles') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']"
@@ -115,6 +165,9 @@ const breadcrumbs = computed(() => {
                     </span>
                 </nav>
                 <slot />
+                <Transition name="fade">
+                    <Toast v-if="showToast" :message="toastMessage" :type="toastType" @close="showToast = false" />
+                </Transition>
             </main>
         </div>
     </div>

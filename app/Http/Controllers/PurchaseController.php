@@ -62,7 +62,7 @@ class PurchaseController extends Controller
             }
         });
 
-        return redirect()->route('purchases.index')->with('success', 'Purchase created successfully!');
+        return redirect()->route('purchases.index')->with('message', 'Purchase created successfully!');
     }
 
     public function edit(Purchase $purchase)
@@ -102,7 +102,7 @@ class PurchaseController extends Controller
             }
         });
 
-        return redirect()->route('purchases.index')->with('success', 'Purchase updated successfully!');
+        return redirect()->route('purchases.index')->with('message', 'Purchase updated successfully!');
     }
 
     public function destroy(Purchase $purchase)
@@ -112,6 +112,6 @@ class PurchaseController extends Controller
             $purchase->delete();
         });
 
-        return redirect()->route('purchases.index')->with('success', 'Purchase deleted!');
+        return redirect()->route('purchases.index')->with('message', 'Purchase deleted successfully!');
     }
 }
