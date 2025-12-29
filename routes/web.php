@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SupplierController;
+
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -75,6 +76,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // New Supplier Routes
         Route::resource('suppliers', SupplierController::class);
+
+        // New Supplier Routes
+        Route::resource('suppliers', SupplierController::class);
+
 });
+
+
+
 
 require __DIR__.'/settings.php';
