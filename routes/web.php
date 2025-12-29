@@ -21,10 +21,6 @@ Route::get('dashboard', function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     // Product Routes with permission checks
     Route::group(['middleware' => ['permission:product.view']], function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');

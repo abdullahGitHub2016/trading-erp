@@ -7,35 +7,54 @@ import {
     Shield,
     LogOut,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    AlertTriangle,
+    X
 } from 'lucide-vue-next'; //
+
+import Toast from '@/components/Toast.vue';
 
 const page = usePage();
 const isExpanded = ref(false); // Default to collapsed
+
+defineProps({
+    show: Boolean,
+    title: { type: String, default: 'Confirm Deletion' },
+    message: { type: String, default: 'Are you sure you want to delete this item? This action cannot be undone.' }
+});
+
+defineEmits(['close', 'confirm']);
 
 const isAuthenticated = computed(() => !!page.props.auth.user);
 
 const isUrlActive = (path: string) => {
     return window.location.pathname.startsWith(path);
 };
-
+// Dynamic Breadcrumbs based on the URL
+const breadcrumbs = computed(() => {
+    const paths = window.location.pathname.split('/').filter(p => p && p !== 'admin');
+    return paths.map((path, index) => ({
+        name: path.charAt(0).toUpperCase() + path.slice(1),
+        href: '/' + paths.slice(0, index + 1).join('/')
+    }));
+});
 </script>
+
 
 <template>
     <div class="min-h-screen bg-slate-50 flex">
-        <aside
-            v-if="isAuthenticated"
-            :class="[
-                isExpanded ? 'w-64' : 'w-20',
-                'bg-white border-r min-h-screen transition-all duration-300 flex flex-col'
-            ]"
-        >
+        <Toast />
+        <aside v-if="isAuthenticated" :class="[
+            isExpanded ? 'w-64' : 'w-20',
+            'bg-white border-r min-h-screen transition-all duration-300 flex flex-col'
+        ]">
             <div class="h-16 flex items-center justify-between px-4 border-b">
                 <div v-if="isExpanded" class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
                     <div class="p-1 bg-blue-600 rounded text-white shrink-0">
                         <Shield class="w-5 h-5" />
                     </div>
-                    <span class="font-bold text-slate-900 tracking-tight">TRD<span class="text-blue-600">ERP</span></span>
+                    <span class="font-bold text-slate-900 tracking-tight">TRD<span
+                            class="text-blue-600">ERP</span></span>
                 </div>
                 <div v-else class="mx-auto text-blue-600">
                     <Shield class="w-6 h-6" />
@@ -48,33 +67,26 @@ const isUrlActive = (path: string) => {
             </div>
 
             <nav class="p-4 space-y-2 flex-1 overflow-hidden">
-        <Link href="/dashboard"
-            :class="[isUrlActive('/dashboard') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']"
-        >
-            <LayoutDashboard class="w-5 h-5 shrink-0" />
-            <span v-if="isExpanded" class="whitespace-nowrap">Dashboard</span>
-        </Link>
+                <Link href="/dashboard"
+                    :class="[isUrlActive('/dashboard') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    <LayoutDashboard class="w-5 h-5 shrink-0" />
+                    <span v-if="isExpanded" class="whitespace-nowrap">Dashboard</span>
+                </Link>
 
-        <Link
-            v-if="page.props.auth.user.permissions.includes('product.view')"
-            href="/products"
-            :class="[isUrlActive('/products') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']"
-        >
-            <Package class="w-5 h-5 shrink-0" />
-            <span v-if="isExpanded" class="whitespace-nowrap">Products</span>
-        </Link>
+                <Link v-if="page.props.auth.user.permissions.includes('product.view')" href="/products"
+                    :class="[isUrlActive('/products') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    <Package class="w-5 h-5 shrink-0" />
+                    <span v-if="isExpanded" class="whitespace-nowrap">Products</span>
+                </Link>
 
-        <Link
-            v-if="page.props.auth.user.roles.includes('Admin')"
-            href="/admin/roles"
-            :class="[isUrlActive('/admin/roles') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']"
-            title="Role Management"
-        >
-            <Shield class="w-5 h-5 shrink-0" />
-            <span v-if="isExpanded" class="whitespace-nowrap">Role Management</span>
-        </Link>
+                <Link v-if="page.props.auth.user.roles.includes('Admin')" href="/admin/roles"
+                    :class="[isUrlActive('/admin/roles') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']"
+                    title="Role Management">
+                    <Shield class="w-5 h-5 shrink-0" />
+                    <span v-if="isExpanded" class="whitespace-nowrap">Role Management</span>
+                </Link>
 
-    </nav>
+            </nav>
         </aside>
 
         <div class="flex-1 flex flex-col min-w-0">
@@ -87,13 +99,21 @@ const isUrlActive = (path: string) => {
 
                 <div v-if="isAuthenticated" class="flex items-center gap-4">
                     <span class="text-sm font-medium text-slate-700">{{ page.props.auth.user.name }}</span>
-                    <Link href="/logout" method="post" as="button" class="text-red-500 text-sm flex items-center gap-1 hover:underline">
+                    <Link href="/logout" method="post" as="button"
+                        class="text-red-500 text-sm flex items-center gap-1 hover:underline">
                         <LogOut class="w-4 h-4" /> Logout
                     </Link>
                 </div>
             </header>
 
             <main class="p-6">
+                <nav class="flex items-center space-x-2 text-xs font-bold text-slate-400 mb-6 uppercase tracking-wider">
+                    <Link href="/dashboard" class="hover:text-blue-600">Dashboard</Link>
+                    <span v-if="page.url.startsWith('/products')">
+                        <span class="mx-2">/</span>
+                        <span class="text-slate-900">Products</span>
+                    </span>
+                </nav>
                 <slot />
             </main>
         </div>
