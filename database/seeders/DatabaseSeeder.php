@@ -13,6 +13,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+        /*
         // User::factory(10)->create();
 
         User::factory()->create([
@@ -30,8 +32,13 @@ class DatabaseSeeder extends Seeder
             'unit_id' => fn() => $units->random()->id,
         ]);
 
+        */
+
         $this->call([
-        ErpRolePermissionSeeder::class, // Use the class constant
+        //ErpRolePermissionSeeder::class, // Use the class constant
+        SupplierSeeder::class,
+        ProductSeeder::class,
+        PurchaseSeeder::class,
     ]);
     }
 }

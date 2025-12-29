@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\Admin\RoleController;
+
+
 
 
 Route::get('/', function () {
@@ -17,9 +21,14 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-//Route::resource('products', ProductController::class)->middleware(['auth'])->middleware('permission:product.view');;
+Route::resource('products', ProductController::class)->middleware(['auth'])->middleware('permission:product.view');;
 
+/*
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
 
     // Product Routes with permission checks
     Route::group(['middleware' => ['permission:product.view']], function () {
@@ -42,6 +51,8 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+*/
+
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -49,12 +60,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:Admin'])->prefix('admin')->group(function () {
         Route::post('/admin/roles/{role}/toggle', [RoleController::class, 'togglePermission'])->name('roles.toggle-permission');
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-// This handles the GET request to show the page
-    Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        // This handles the GET request to show the page
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
 
-    // THIS IS THE MISSING PIECE: It handles the PUT request to update permissions
-    // The {role} parameter must match what you send from the frontend
-    Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');    });
+        // THIS IS THE MISSING PIECE: It handles the PUT request to update permissions
+        // The {role} parameter must match what you send from the frontend
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');    });
+
+        // Product Routes
+        Route::resource('products', ProductController::class);
+
+        // New Purchase Routes
+        Route::resource('purchases', PurchaseController::class);
+
+        // New Supplier Routes
+        Route::resource('suppliers', SupplierController::class);
 });
 
 require __DIR__.'/settings.php';
