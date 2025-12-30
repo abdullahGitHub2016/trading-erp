@@ -11,19 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
+        Schema::create('chart_of_accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // e.g., kg, pcs, box
-            $table->string('short_name')->unique(); // Add this line
+            $table->string('name');
+            $table->string('code')->unique(); // <--- Make sure this line exists
+            $table->enum('type', ['asset', 'liability', 'equity', 'revenue', 'expense']);
             $table->timestamps();
         });
     }
 
-    /**
+    /**`
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('units');
+        Schema::dropIfExists('chart_of_accounts');
     }
 };

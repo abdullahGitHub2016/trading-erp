@@ -3,42 +3,35 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Category;
+use App\Models\Unit;
+use App\Models\Product;
+use App\Models\Customer;
+use App\Models\Sale;
+use App\Models\SaleItem;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
-    {
+    // database/seeders/DatabaseSeeder.php
 
-        /*
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
-        // 1. Create specific categories and units first
-        $categories = \App\Models\Category::factory()->count(10)->create();
-        $units = \App\Models\Unit::factory()->count(4)->create();
-
-        // 2. Create 50 products using those existing categories/units
-        \App\Models\Product::factory()->count(50)->create([
-            'category_id' => fn() => $categories->random()->id,
-            'unit_id' => fn() => $units->random()->id,
-        ]);
-
-        */
-
-        $this->call([
-        //ErpRolePermissionSeeder::class, // Use the class constant
-        SupplierSeeder::class,
-        ProductSeeder::class,
-        PurchaseSeeder::class,
+public function run(): void
+{
+    // 1. Core Data
+    $this->call([
+        ErpRolePermissionSeeder::class,
+        UserSeeder::class,
+        CategorySeeder::class,
+        UnitSeeder::class,
     ]);
-    }
+
+    // 2. Master Data (Dependencies)
+    \App\Models\Supplier::factory(10)->create(); // Create these FIRST
+    \App\Models\Customer::factory(10)->create();
+    \App\Models\Product::factory(20)->create();
+
+    // 3. Transaction Data (Children)
+    \App\Models\Purchase::factory(10)->create(); // Now this will find suppliers
+    \App\Models\Sale::factory(10)->create();
+}
 }

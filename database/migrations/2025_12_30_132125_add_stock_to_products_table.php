@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('units', function (Blueprint $table) {
-            $table->id();
-            $table->string('name'); // e.g., kg, pcs, box
-            $table->string('short_name')->unique(); // Add this line
-            $table->timestamps();
+        Schema::table('products', function (Blueprint $table) {
+            $table->integer('stock_quantity')->default(0)->after('sale_price');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('units');
+        Schema::table('products', function (Blueprint $table) {
+            //
+        });
     }
 };

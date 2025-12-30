@@ -13,19 +13,11 @@ class UnitFactory extends Factory
      * @return array<string, mixed>
      */
     public function definition(): array
-    {
-        return [
-            // Uses unique() to prevent duplicate unit names during seeding
-            'name' => $this->faker->unique()->randomElement([
-                'pcs',    // Pieces
-                'kg',     // Kilograms
-                'g',      // Grams
-                'box',    // Box
-                'pkt',    // Packet
-                'mtr',    // Meter
-                'ltr',    // Liter
-                'dz',     // Dozen
-            ]),
-        ];
-    }
+{
+    return [
+        'name' => $this->faker->unique()->word(),
+        // Use unique() modifier before the generator
+        'short_name' => $this->faker->unique()->bothify('??-###'), // Generates unique like "PK-123"
+    ];
+}
 }

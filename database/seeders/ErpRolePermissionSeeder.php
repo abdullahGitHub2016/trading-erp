@@ -50,6 +50,12 @@ class ErpRolePermissionSeeder extends Seeder
             'user.update',
             'user.delete',
             'role.manage',
+
+            // Suppliers
+            'supplier.view',
+            'supplier.create',
+            'supplier.update',
+            'supplier.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -112,6 +118,11 @@ class ErpRolePermissionSeeder extends Seeder
             'report.stock',
             'report.sales',
             'report.purchase',
+            // ... other permissions ...
+            'supplier.view',
+            'supplier.create',
+            'supplier.update',
+            'supplier.delete',
         ]);
 
         // Storekeeper
@@ -133,6 +144,7 @@ class ErpRolePermissionSeeder extends Seeder
             'report.sales',
             'report.purchase',
             'report.profit',
+            'supplier.view',
         ]);
     }
 }

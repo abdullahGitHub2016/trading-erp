@@ -5,18 +5,20 @@ import {
     LayoutDashboard,
     Package,
     Shield,
+    Truck,
     LogOut,
     ChevronLeft,
     ChevronRight,
     AlertTriangle,
-    X
-} from 'lucide-vue-next'; //
-
-import { ShoppingCart, ShoppingBag, ReceiptText } from 'lucide-vue-next';
+    X,
+    ShoppingCart,
+    ShoppingBag,
+    ReceiptText
+} from 'lucide-vue-next';
 
 import Toast from '@/components/Toast.vue';
 
-// Define all possible keys that might come from Laravel
+// Define flash message types
 interface FlashProps {
     message?: string | null;
     success?: string | null;
@@ -24,18 +26,17 @@ interface FlashProps {
 }
 
 const page = usePage();
-const isExpanded = ref(true); // Default to collapsed
+const isExpanded = ref(true);
 
+// Toast State
 const showToast = ref(false);
 const toastMessage = ref('');
-const toastType = ref('success'); // 'success' or 'error'
+const toastType = ref<'success' | 'error'>('success');
 
-// Watch for changes in the Inertia flash property
+// Watch for flash messages from Laravel
 watch(
-    // Cast the page props to our interface so TS knows 'success' exists
     () => page.props.flash as unknown as FlashProps,
     (flash: FlashProps) => {
-        // Now TS will allow flash.success
         const messageToShow = flash.success || flash.message;
 
         if (messageToShow) {
@@ -53,45 +54,25 @@ watch(
 
 function triggerToast() {
     showToast.value = true;
-    // Automatically hide after 3 seconds
     setTimeout(() => {
         showToast.value = false;
     }, 3000);
 }
-
-
-defineProps({
-    show: Boolean,
-    title: { type: String, default: 'Confirm Deletion' },
-    message: { type: String, default: 'Are you sure you want to delete this item? This action cannot be undone.' }
-});
-
-defineEmits(['close', 'confirm']);
 
 const isAuthenticated = computed(() => !!page.props.auth.user);
 
 const isUrlActive = (path: string) => {
     return window.location.pathname.startsWith(path);
 };
-// Dynamic Breadcrumbs based on the URL
-const breadcrumbs = computed(() => {
-    const paths = window.location.pathname.split('/').filter(p => p && p !== 'admin');
-    return paths.map((path, index) => ({
-        name: path.charAt(0).toUpperCase() + path.slice(1),
-        href: '/' + paths.slice(0, index + 1).join('/')
-    }));
-});
 </script>
-
 
 <template>
     <div class="min-h-screen bg-slate-50 flex">
-        <Toast />
         <aside v-if="isAuthenticated" :class="[
             isExpanded ? 'w-64' : 'w-20',
             'bg-white border-r min-h-screen transition-all duration-300 flex flex-col'
         ]">
-            <div class="h-16 flex items-center justify-between px-4 border-b">
+            <div class="h-16 flex items-center justify-between px-4 border-b text-blue-600">
                 <div v-if="isExpanded" class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
                     <div class="p-1 bg-blue-600 rounded text-white shrink-0">
                         <Shield class="w-5 h-5" />
@@ -99,11 +80,11 @@ const breadcrumbs = computed(() => {
                     <span class="font-bold text-slate-900 tracking-tight">TRD<span
                             class="text-blue-600">ERP</span></span>
                 </div>
-                <div v-else class="mx-auto text-blue-600">
+                <div v-else class="mx-auto">
                     <Shield class="w-6 h-6" />
                 </div>
 
-                <button @click="isExpanded = !isExpanded" class="p-1 hover:bg-slate-100 rounded-md ml-auto">
+                <button @click="isExpanded = !isExpanded" class="p-1 hover:bg-slate-100 rounded-md">
                     <ChevronLeft v-if="isExpanded" class="w-4 h-4 text-slate-400" />
                     <ChevronRight v-else class="w-4 h-4 text-slate-400" />
                 </button>
@@ -121,32 +102,36 @@ const breadcrumbs = computed(() => {
                     <Package class="w-5 h-5 shrink-0" />
                     <span v-if="isExpanded" class="whitespace-nowrap">Products</span>
                 </Link>
+
                 <Link v-if="page.props.auth.user.permissions.includes('purchase.view')" href="/purchases"
                     :class="[isUrlActive('/purchases') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
-
                     <ShoppingCart class="w-5 h-5 shrink-0" />
-
                     <span v-if="isExpanded" class="whitespace-nowrap">Purchases</span>
                 </Link>
 
-                <Link v-if="page.props.auth.user.roles.includes('Admin')" href="/admin/roles"
-                    :class="[isUrlActive('/admin/roles') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']"
-                    title="Role Management">
-                    <Shield class="w-5 h-5 shrink-0" />
-                    <span v-if="isExpanded" class="whitespace-nowrap">Role Management</span>
+                <Link v-if="page.props.auth.user.permissions.includes('supplier.view')" href="/suppliers"
+                    :class="[isUrlActive('/suppliers') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    <Truck class="w-5 h-5 shrink-0" />
+                    <span v-if="isExpanded" class="whitespace-nowrap">Suppliers</span>
                 </Link>
-
+                <Link href="/sales" class="menu-item" :class="{ 'active': $page.url.startsWith('/sales') }">
+                    <i class="fa fa-shopping-cart mr-2"></i>
+                    <span>Sales</span>
+                </Link>
+                <Link v-if="page.props.auth.user.permissions.includes('role.manage')" href="/admin/roles"
+                    :class="[isUrlActive('/admin/roles') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    <Shield class="w-5 h-5 shrink-0" />
+                    <span v-if="isExpanded" class="whitespace-nowrap">Roles & Permissions</span>
+                </Link>
             </nav>
         </aside>
 
         <div class="flex-1 flex flex-col min-w-0">
             <header class="bg-white border-b h-16 flex items-center justify-between px-6 sticky top-0 z-10">
                 <div class="flex items-center gap-2">
-                    <span v-if="!isAuthenticated" class="text-xl font-bold text-slate-900 tracking-tight">
-                        TRD<span class="text-blue-600">ERP</span>
-                    </span>
+                    <span v-if="!isAuthenticated"
+                        class="text-xl font-bold text-slate-900 tracking-tight">TRD<span>ERP</span></span>
                 </div>
-
                 <div v-if="isAuthenticated" class="flex items-center gap-4">
                     <span class="text-sm font-medium text-slate-700">{{ page.props.auth.user.name }}</span>
                     <Link href="/logout" method="post" as="button"
@@ -156,19 +141,30 @@ const breadcrumbs = computed(() => {
                 </div>
             </header>
 
-            <main class="p-6">
-                <nav class="flex items-center space-x-2 text-xs font-bold text-slate-400 mb-6 uppercase tracking-wider">
-                    <Link href="/dashboard" class="hover:text-blue-600">Dashboard</Link>
-                    <span v-if="page.url.startsWith('/products')">
-                        <span class="mx-2">/</span>
-                        <span class="text-slate-900">Products</span>
-                    </span>
-                </nav>
+            <main class="p-6 relative">
                 <slot />
-                <Transition name="fade">
+
+                <Transition name="toast">
                     <Toast v-if="showToast" :message="toastMessage" :type="toastType" @close="showToast = false" />
                 </Transition>
             </main>
         </div>
     </div>
 </template>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+    transition: all 0.3s ease;
+}
+
+.toast-enter-from {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.toast-leave-to {
+    opacity: 0;
+    transform: scale(0.95);
+}
+</style>

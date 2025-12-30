@@ -46,11 +46,13 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user() ? [
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
-// Use optional() or null-coalescing to prevent errors when logged out
-            'roles' => $request->user() ? $request->user()->getRoleNames() : [],
-            'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name') : [],                ] : null,
+                    // Ensure these stay INSIDE the user array
+                    'roles' => $request->user()->getRoleNames(),
+                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                ] : null,
             ],
             'flash' => [
+                'success' => fn() => $request->session()->get('success'),
                 'message' => fn() => $request->session()->get('message'),
                 'error'   => fn() => $request->session()->get('error'),
             ],
