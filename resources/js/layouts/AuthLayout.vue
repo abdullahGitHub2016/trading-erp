@@ -61,12 +61,17 @@ function triggerToast() {
 
 const isAuthenticated = computed(() => !!page.props.auth.user);
 
-const isUrlActive = (path: string) => {
+const isUrlActive = (path: string): boolean => {
     return window.location.pathname.startsWith(path);
 };
 </script>
 
 <template>
+
+    <!--     <div class="debug-box bg-black text-green-400 p-4 m-4 text-xs overflow-auto max-h-40">
+        <strong>Permissions:</strong>
+        <pre>{{ page.props.auth.user.permissions }}</pre>
+    </div> -->
     <div class="min-h-screen bg-slate-50 flex">
         <aside v-if="isAuthenticated" :class="[
             isExpanded ? 'w-64' : 'w-20',
@@ -114,9 +119,10 @@ const isUrlActive = (path: string) => {
                     <Truck class="w-5 h-5 shrink-0" />
                     <span v-if="isExpanded" class="whitespace-nowrap">Suppliers</span>
                 </Link>
-                <Link href="/sales" class="menu-item" :class="{ 'active': $page.url.startsWith('/sales') }">
-                    <i class="fa fa-shopping-cart mr-2"></i>
-                    <span>Sales</span>
+                <Link v-if="page.props.auth.user.permissions.includes('sale.view')" href="/sales"
+                    :class="[isUrlActive('/sales') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    <ShoppingBag class="w-5 h-5 shrink-0" />
+                    <span v-if="isExpanded" class="whitespace-nowrap">Sales</span>
                 </Link>
                 <Link v-if="page.props.auth.user.permissions.includes('role.manage')" href="/admin/roles"
                     :class="[isUrlActive('/admin/roles') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
