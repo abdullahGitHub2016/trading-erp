@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm, Head } from '@inertiajs/vue3';
+import { useForm, Head, Link } from '@inertiajs/vue3';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import Swal from 'sweetalert2'; // Use SweetAlert2 instead of Toastr
+import Swal from 'sweetalert2';
 
 const props = defineProps({
     customers: Array,
@@ -12,13 +12,13 @@ const props = defineProps({
 const form = useForm({
     customer_id: '',
     items: [],
-    grand_total: 0, // Matches Controller validation
+    grand_total: 0,
     note: ''
 });
 
 const selectedProductId = ref("");
 
-// Adds product to the list
+// Adds product to the list with stock check and price suggestion
 const addToCart = () => {
     if (!selectedProductId.value) return;
 
@@ -27,20 +27,25 @@ const addToCart = () => {
     if (product) {
         const existingItem = form.items.find(item => item.product_id === product.id);
         if (existingItem) {
-            existingItem.qty++;
+            if (existingItem.qty < product.stock_quantity) {
+                existingItem.qty++;
+            } else {
+                Swal.fire('Out of Stock', 'Cannot add more than available stock.', 'warning');
+            }
         } else {
             form.items.push({
                 product_id: product.id,
                 name: product.name,
-                unit_price: parseFloat(product.price || 0),
-                qty: 1
+                // Suggests the price from your product database
+                unit_price: parseFloat(product.sale_price || product.purchase_price || 0),
+                qty: 1,
+                stock: product.stock_quantity
             });
         }
         selectedProductId.value = "";
     }
 };
 
-// Removes an item from the list
 const removeItem = (index) => {
     form.items.splice(index, 1);
 };
@@ -52,7 +57,6 @@ const grandTotal = computed(() => {
         return sum + lineTotal;
     }, 0);
 
-    // Sync the computed total with the form object
     form.grand_total = total;
     return total;
 });
@@ -65,21 +69,11 @@ const submit = () => {
 
     form.post('/sales', {
         onSuccess: () => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: 'Sale recorded and ledger updated.',
-                timer: 2000
-            });
+            Swal.fire({ icon: 'success', title: 'Success!', text: 'Sale recorded.', timer: 2000 });
         },
         onError: (errors) => {
-            // Handle Laravel Validation Errors
             let errorMsg = Object.values(errors).join('<br>');
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Failed',
-                html: errorMsg
-            });
+            Swal.fire({ icon: 'error', title: 'Validation Failed', html: errorMsg });
         }
     });
 };
@@ -91,7 +85,6 @@ const formatCurrency = (val) => {
 
 <template>
     <Head title="Create Sale" />
-
     <AuthLayout>
         <div class="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-4">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">New Sale Invoice</h2>
@@ -99,22 +92,22 @@ const formatCurrency = (val) => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Customer</label>
-                    <select v-model="form.customer_id" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <select v-model="form.customer_id" class="w-full border-gray-300 rounded-lg shadow-sm">
                         <option value="">Select Customer</option>
                         <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Add Product to Invoice</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Add Product (Shows Stock)</label>
                     <div class="flex gap-2">
-                        <select v-model="selectedProductId" class="flex-1 border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <select v-model="selectedProductId" class="flex-1 border-gray-300 rounded-lg shadow-sm">
                             <option value="">Choose a product...</option>
                             <option v-for="p in products" :key="p.id" :value="p.id">
                                 {{ p.name }} (Stock: {{ p.stock_quantity }})
                             </option>
                         </select>
-                        <button @click="addToCart" type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">
+                        <button @click="addToCart" type="button" class="bg-blue-600 text-white px-6 py-2 rounded-lg">
                             Add
                         </button>
                     </div>
@@ -133,27 +126,20 @@ const formatCurrency = (val) => {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr v-for="(item, index) in form.items" :key="index" class="hover:bg-gray-50 transition">
+                        <tr v-for="(item, index) in form.items" :key="index">
                             <td class="p-4 font-medium">{{ item.name }}</td>
                             <td class="p-4">
-                                <input type="number" v-model.number="item.qty" min="1" class="w-full border-gray-300 rounded p-1 shadow-sm">
+                                <input type="number" v-model.number="item.qty" class="w-full border-gray-300 rounded p-1">
                             </td>
                             <td class="p-4">
-                                <input type="number" v-model.number="item.unit_price" step="0.01" class="w-full border-gray-300 rounded p-1 shadow-sm">
+                                <input type="number" v-model.number="item.unit_price" step="0.01" class="w-full border-gray-300 rounded p-1">
                             </td>
-                            <td class="p-4 text-right font-semibold text-gray-700">
+                            <td class="p-4 text-right font-semibold">
                                 {{ formatCurrency((item.qty || 0) * (item.unit_price || 0)) }}
                             </td>
                             <td class="p-4 text-center">
-                                <button @click="removeItem(index)" class="text-red-500 hover:text-red-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                                <button @click="removeItem(index)" class="text-red-500 hover:text-red-700">Remove</button>
                             </td>
-                        </tr>
-                        <tr v-if="form.items.length === 0">
-                            <td colspan="5" class="p-8 text-center text-gray-400 italic">No items added to the invoice yet.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -164,11 +150,14 @@ const formatCurrency = (val) => {
                     <span class="text-gray-500 font-medium">Grand Total:</span>
                     <span class="text-3xl font-black text-blue-600 ml-2">{{ formatCurrency(grandTotal) }}</span>
                 </div>
-                <button @click="submit"
-                        :disabled="form.processing"
-                        class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-10 py-3 rounded-lg font-bold shadow-lg transition transform active:scale-95">
-                    {{ form.processing ? 'Processing...' : 'Complete Sale' }}
-                </button>
+                <div class="flex gap-3">
+                    <Link href="/sales" class="px-8 py-3 bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 font-bold rounded-lg transition-all border border-transparent hover:border-red-200">
+                        Cancel
+                    </Link>
+                    <button @click="submit" :disabled="form.processing" class="bg-green-600 hover:bg-green-700 text-white px-10 py-3 rounded-lg font-bold shadow-lg">
+                        {{ form.processing ? 'Processing...' : 'Complete Sale' }}
+                    </button>
+                </div>
             </div>
         </div>
     </AuthLayout>

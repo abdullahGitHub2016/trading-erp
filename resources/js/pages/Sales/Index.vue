@@ -7,9 +7,14 @@ defineProps({
     sales: Object
 });
 
-const deleteSale = (id) => {
-    if (confirm('Are you sure you want to delete this sale?')) {
-        router.delete(`/sales/${id}`);
+// Update your deleteSale function to include the invoice number for clarity
+const deleteSale = (id, invoiceNo) => {
+    if (confirm(`CAUTION: Deleting sale ${invoiceNo} will restore stock and delete accounting records. Proceed?`)) {
+        router.delete(`/sales/${id}`, {
+            onSuccess: () => {
+                // You can add a success notification here
+            }
+        });
     }
 };
 </script>
@@ -45,7 +50,7 @@ const deleteSale = (id) => {
                                     class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded text-sm transition">
                                     Edit
                                 </button>
-                                <button @click="deleteSale(sale.id)"
+                                <button @click="deleteSale(sale.id, sale.invoice_no)"
                                     class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition">
                                     Delete
                                 </button>
@@ -61,17 +66,14 @@ const deleteSale = (id) => {
             <div v-if="sales.links.length > 3" class="mt-6 flex flex-wrap justify-center gap-2">
                 <template v-for="(link, k) in sales.links" :key="k">
                     <div v-if="link.url === null"
-                         class="px-4 py-2 text-slate-400 border border-slate-200 rounded cursor-not-allowed bg-slate-50"
-                         v-html="link.label" />
+                        class="px-4 py-2 text-slate-400 border border-slate-200 rounded cursor-not-allowed bg-slate-50"
+                        v-html="link.label" />
 
-                    <Link v-else
-                          :href="link.url"
-                          class="px-4 py-2 border rounded transition-colors duration-200"
-                          :class="{
-                              'bg-blue-600 text-white border-blue-600': link.active,
-                              'bg-white text-slate-600 border-slate-200 hover:bg-slate-100': !link.active
-                          }"
-                          v-html="link.label" />
+                    <Link v-else :href="link.url" class="px-4 py-2 border rounded transition-colors duration-200"
+                        :class="{
+                            'bg-blue-600 text-white border-blue-600': link.active,
+                            'bg-white text-slate-600 border-slate-200 hover:bg-slate-100': !link.active
+                        }" v-html="link.label" />
                 </template>
             </div>
         </div>

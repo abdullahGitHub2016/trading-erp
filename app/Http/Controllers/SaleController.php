@@ -21,13 +21,16 @@ class SaleController extends Controller
         ]);
     }
 
-    public function create()
-    {
-        return Inertia::render('Sales/Create', [
-            'customers' => Customer::all(),
-            'products' => Product::where('stock_quantity', '>', 0)->get()
-        ]);
-    }
+public function create()
+{
+    return Inertia::render('Sales/Create', [
+        'customers' => Customer::all(),
+        // Ensure sale_price and purchase_price are selected
+        'products' => Product::where('stock_quantity', '>', 0)
+            ->select('id', 'name', 'sale_price', 'purchase_price', 'stock_quantity')
+            ->get()
+    ]);
+}
 
     public function edit($id)
     {
@@ -195,4 +198,36 @@ class SaleController extends Controller
             'reference_id' => $journal->id,
         ]);
     }
+
+/**
+ * Remove the sale and reverse its impact on stock and accounting.
+ */
+public function destroy($id)
+{
+    return DB::transaction(function () use ($id) {
+        $sale = Sale::with('items')->findOrFail($id);
+
+        // 1. Caution: Reverse Stock Impact
+        // We must add the quantities back to the product stock
+        foreach ($sale->items as $item) {
+            $product = Product::find($item->product_id);
+            if ($product) {
+                $product->increment('stock_quantity', $item->quantity);
+            }
+        }
+
+        // 2. Remove Financial History
+        // Delete related Journal and Ledger entries
+        Journal::where('journalable_id', $sale->id)
+               ->where('journalable_type', Sale::class)
+               ->delete();
+
+        // 3. Delete the Sale (and items via cascading or manual delete)
+        $sale->items()->delete();
+        $sale->delete();
+
+        return redirect()->route('sales.index')->with('success', 'Sale deleted and stock restored.');
+    });
+}
+
 }
