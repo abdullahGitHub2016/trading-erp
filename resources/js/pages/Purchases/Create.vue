@@ -12,12 +12,13 @@ interface Supplier {
 interface Product {
     id: number;
     name: string;
-    price: number;
+    purchase_price: number | string; // Update this to match Controller
+    stock_quantity: number;
 }
 
 const props = defineProps < {
     suppliers: Array < { id: number, name: string } >;
-    products: Array < { id: number, name: string, price: number } >; // Must be here!
+    products: Array<Product>; // Now uses the updated interface
 } > ();
 
 // Initialize the form with one empty row
@@ -44,29 +45,28 @@ const removeItem = (index: number) => {
 };
 
 // Update price automatically when a product is selected
+// Update price automatically when a product is selected
 const onProductChange = (index: number) => {
-    // We cast both to Number to satisfy TypeScript and ensure the match works
-    const productId = form.items[index].product_id;
-
-    if (!productId) return;
-
-    const selectedProduct = props.products.find(
-        p => Number(p.id) === Number(productId)
-    );
+    const selectedProduct = props.products.find(p => Number(p.id) === Number(form.items[index].product_id));
 
     if (selectedProduct) {
-        // Ensure price is also treated as a number
-        form.items[index].unit_price = Number(selectedProduct.price);
+        // Use purchase_price instead of price
+        form.items[index].unit_price = Number(selectedProduct.purchase_price || 0);
         calculateTotal();
     }
 };
+
 const calculateTotal = () => {
-    let total = 0;
-    form.items.forEach(item => {
-        item.subtotal = Number(item.quantity) * Number(item.unit_price);
-        total += item.subtotal;
+    let grandTotal = 0;
+    form.items.forEach((item) => {
+        // Ensure quantity and price are numbers to avoid NaN
+        const qty = Number(item.quantity || 0);
+        const price = Number(item.unit_price || 0);
+
+        item.subtotal = qty * price;
+        grandTotal += item.subtotal;
     });
-    form.total_amount = total;
+    form.total_amount = grandTotal;
 };
 
 const submit = () => {

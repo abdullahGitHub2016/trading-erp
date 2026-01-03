@@ -11,6 +11,7 @@ class Ledger extends Model
         'chart_of_account_id',
         'reference_type',
         'reference_id',
+        'transaction_date', // Ensure this is here
         'debit',
         'credit',
         'transaction_date',

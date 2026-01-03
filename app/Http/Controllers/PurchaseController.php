@@ -14,9 +14,6 @@ use Inertia\Inertia;
 
 class PurchaseController extends Controller
 {
-    /**
-     * Display a listing of purchases.
-     */
     public function index()
     {
         return Inertia::render('Purchases/Index', [
@@ -24,9 +21,6 @@ class PurchaseController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new purchase.
-     */
     public function create()
     {
         return Inertia::render('Purchases/Create', [
@@ -35,84 +29,112 @@ class PurchaseController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created purchase and automate ledger entries.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
             'items' => 'required|array|min:1',
-            'total' => 'required|numeric',
+            'total_amount' => 'required|numeric',
         ]);
 
         return DB::transaction(function () use ($request) {
-            $purchaseNo = 'PO-' . time();
-
             $purchase = Purchase::create([
-                'purchase_no'   => $purchaseNo,
+                'purchase_no'   => 'PO-' . time(),
                 'supplier_id'   => $request->supplier_id,
-                'purchase_date' => now(),
-                'total_amount'  => $request->total,
+                'purchase_date' => $request->purchase_date ?? now(),
+                'total_amount'  => $request->total_amount,
                 'status'        => 'received',
                 'created_by'    => Auth::id(),
             ]);
 
-            $this->createAccountingEntries($purchase, $request->total);
-
+            // Save line items to purchase_items table
             foreach ($request->items as $item) {
+                $purchase->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity'   => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'subtotal'   => $item['subtotal'],
+                ]);
+
+                // Update stock and last purchase price
                 $product = Product::find($item['product_id']);
                 if ($product) {
-                    $product->increment('stock_quantity', $item['qty']);
+                    $product->increment('stock_quantity', $item['quantity']);
                     $product->update(['purchase_price' => $item['unit_price']]);
                 }
             }
+
+            $this->createAccountingEntries($purchase, $request->total_amount);
 
             return redirect('/purchases')->with('success', 'Purchase recorded!');
         });
     }
 
-    /**
-     * Show the form for editing the specified purchase.
-     */
-    public function edit($id)
-    {
-        return Inertia::render('Purchases/Edit', [
-            'purchase' => Purchase::with('supplier')->findOrFail($id),
-            'suppliers' => Supplier::all(),
-            'products' => Product::all()
+/**
+ * Show the form for editing the specified purchase.
+ */
+public function edit($id)
+{
+    return Inertia::render('Purchases/Edit', [
+        // Load items relationship
+        'purchase' => Purchase::with(['supplier', 'items'])->findOrFail($id),
+        'suppliers' => Supplier::all(),
+        // Explicitly select purchase_price to match the Vue interface
+        'products' => Product::select('id', 'name', 'purchase_price', 'stock_quantity')->get()
+    ]);
+}
+
+/**
+ * Update the purchase and handle items.
+ */
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'supplier_id' => 'required',
+        'items' => 'required|array',
+        'total_amount' => 'required|numeric',
+    ]);
+
+    return DB::transaction(function () use ($request, $id) {
+        $purchase = Purchase::with('items')->findOrFail($id);
+
+        // 1. Reverse stock for old items
+        foreach ($purchase->items as $oldItem) {
+            Product::where('id', $oldItem->product_id)->decrement('stock_quantity', $oldItem->quantity);
+        }
+
+        // 2. Clean up old children
+        $purchase->items()->delete();
+        Journal::where('journalable_id', $purchase->id)
+               ->where('journalable_type', Purchase::class)
+               ->delete();
+
+        // 3. Update main Purchase
+        $purchase->update([
+            'supplier_id' => $request->supplier_id,
+            'purchase_date' => $request->purchase_date,
+            'total_amount' => $request->total_amount,
         ]);
-    }
 
-    /**
-     * Update the purchase and recalculate ledger entries.
-     */
-    public function update(Request $request, $id)
-    {
-        return DB::transaction(function () use ($request, $id) {
-            $purchase = Purchase::findOrFail($id);
-
-            // 1. Reverse old accounting entries
-            Journal::where('journalable_id', $purchase->id)
-                   ->where('journalable_type', Purchase::class)
-                   ->delete();
-
-            // 2. Update Purchase record
-            $purchase->update([
-                'supplier_id' => $request->supplier_id,
-                'total_amount' => $request->total,
+        // 4. Save new items and update stock
+        foreach ($request->items as $item) {
+            $purchase->items()->create([
+                'product_id' => $item['product_id'],
+                'quantity'   => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'subtotal'   => $item['subtotal'],
             ]);
 
-            // 3. Create new accounting entries for the updated amount
-            $this->createAccountingEntries($purchase, $request->total);
+            Product::where('id', $item['product_id'])->increment('stock_quantity', $item['quantity']);
+        }
 
-            return redirect('/purchases')->with('success', 'Purchase and Ledger updated!');
-        });
-    }
+        // 5. Re-create accounting entries
+        $this->createAccountingEntries($purchase, $request->total_amount);
 
-    /**
-     * Helper method to handle Double-Entry logic.
-     */
+        return redirect('/purchases')->with('success', 'Purchase updated successfully!');
+    });
+}
+
     private function createAccountingEntries($purchase, $total)
     {
         $journal = Journal::create([
@@ -123,31 +145,36 @@ class PurchaseController extends Controller
             'journalable_type' => Purchase::class,
         ]);
 
-        // DEBIT: Inventory Asset (ID 4)
+        // Fix: Added transaction_date to satisfy DB constraints
         $journal->ledgers()->create([
             'chart_of_account_id' => 4,
+            'transaction_date'    => now(),
             'debit'               => $total,
             'credit'              => 0
         ]);
 
-        // CREDIT: Cash on Hand (ID 1)
         $journal->ledgers()->create([
             'chart_of_account_id' => 1,
+            'transaction_date'    => now(),
             'debit'               => 0,
             'credit'              => $total
         ]);
     }
 
-    /**
-     * Remove the purchase and its financial history.
-     */
     public function destroy($id)
     {
         DB::transaction(function () use ($id) {
-            $purchase = Purchase::findOrFail($id);
+            $purchase = Purchase::with('items')->findOrFail($id);
+
+            // Reverse stock before deleting
+            foreach ($purchase->items as $item) {
+                Product::where('id', $item->product_id)->decrement('stock_quantity', $item->quantity);
+            }
+
             Journal::where('journalable_id', $purchase->id)
                    ->where('journalable_type', Purchase::class)
                    ->delete();
+
             $purchase->delete();
         });
 

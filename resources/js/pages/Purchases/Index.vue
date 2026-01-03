@@ -67,7 +67,6 @@ const formatCurrency = (value: number) => {
 
 <template>
     <Head title="Purchase Orders" />
-
     <AuthLayout>
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
