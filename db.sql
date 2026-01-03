@@ -106,7 +106,7 @@ CREATE TABLE `chart_of_accounts` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `chart_of_accounts_code_unique` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -115,7 +115,7 @@ CREATE TABLE `chart_of_accounts` (
 
 LOCK TABLES `chart_of_accounts` WRITE;
 /*!40000 ALTER TABLE `chart_of_accounts` DISABLE KEYS */;
-INSERT INTO `chart_of_accounts` VALUES (1,'Cash on Hand','1000','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(2,'Bank Account','1010','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(3,'Accounts Receivable','1200','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(4,'Inventory Asset','1300','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(5,'Accounts Payable','2000','liability','2025-12-30 07:03:14','2025-12-30 07:03:14'),(6,'Sales Tax Payable','2100','liability','2025-12-30 07:03:14','2025-12-30 07:03:14'),(7,'Owner Equity','3000','equity','2025-12-30 07:03:14','2025-12-30 07:03:14'),(8,'Retained Earnings','3100','equity','2025-12-30 07:03:14','2025-12-30 07:03:14'),(9,'Sales Revenue','4000','revenue','2025-12-30 07:03:14','2025-12-30 07:03:14'),(10,'Service Income','4100','revenue','2025-12-30 07:03:14','2025-12-30 07:03:14'),(11,'Cost of Goods Sold (COGS)','5000','expense','2025-12-30 07:03:14','2025-12-30 07:03:14'),(12,'Office Expenses','5100','expense','2025-12-30 07:03:14','2025-12-30 07:03:14'),(13,'Salary Expense','5200','expense','2025-12-30 07:03:14','2025-12-30 07:03:14'),(14,'Rent Expense','5300','expense','2025-12-30 07:03:15','2025-12-30 07:03:15');
+INSERT INTO `chart_of_accounts` VALUES (1,'Cash on Hand','1000','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(2,'Bank Account','1010','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(3,'Accounts Receivable','1200','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(4,'Inventory Asset','1300','asset','2025-12-30 07:03:14','2025-12-30 07:03:14'),(5,'Accounts Payable','2000','liability','2025-12-30 07:03:14','2025-12-30 07:03:14'),(6,'Sales Tax Payable','2100','liability','2025-12-30 07:03:14','2025-12-30 07:03:14'),(7,'Owner Equity','3000','equity','2025-12-30 07:03:14','2025-12-30 07:03:14'),(8,'Retained Earnings','3100','equity','2025-12-30 07:03:14','2025-12-30 07:03:14'),(9,'Sales Revenue','4000','revenue','2025-12-30 07:03:14','2025-12-30 07:03:14'),(10,'Service Income','4100','revenue','2025-12-30 07:03:14','2025-12-30 07:03:14'),(11,'Cost of Goods Sold (COGS)','5000','expense','2025-12-30 07:03:14','2025-12-30 07:03:14'),(12,'Office Expenses','5100','expense','2025-12-30 07:03:14','2025-12-30 07:03:14'),(13,'Salary Expense','5200','expense','2025-12-30 07:03:14','2025-12-30 07:03:14'),(14,'Rent Expense','5300','expense','2025-12-30 07:03:15','2025-12-30 07:03:15'),(15,'Preety Cash','1001','equity','2026-01-03 10:03:38','2026-01-03 10:03:38');
 /*!40000 ALTER TABLE `chart_of_accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -703,7 +703,7 @@ CREATE TABLE `sessions` (
 
 LOCK TABLES `sessions` WRITE;
 /*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-INSERT INTO `sessions` VALUES ('wBindnK6J66MrD2FQPGBnb471XfYEiIjDsFliP3P',1,'127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZzhvcGNMdGFOUWpISWdIYVM2aWx1S1gyN1hCcXp4eUdoMDJsN3pLZyI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToyOntzOjM6InVybCI7czoyNzoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL3NhbGVzIjtzOjU6InJvdXRlIjtzOjExOiJzYWxlcy5pbmRleCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fX0=',1767431701);
+INSERT INTO `sessions` VALUES ('wBindnK6J66MrD2FQPGBnb471XfYEiIjDsFliP3P',1,'127.0.0.1','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36','YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZzhvcGNMdGFOUWpISWdIYVM2aWx1S1gyN1hCcXp4eUdoMDJsN3pLZyI7czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjk6Il9wcmV2aW91cyI7YToyOntzOjM6InVybCI7czo0MjoiaHR0cDovLzEyNy4wLjAuMTo4MDAwL2FjY291bnRpbmcvbGVkZ2VyLzE0IjtzOjU6InJvdXRlIjtOO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX19',1767437723);
 /*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -807,4 +807,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-03 15:16:18
+-- Dump completed on 2026-01-03 17:16:02
