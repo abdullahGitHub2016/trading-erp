@@ -12,9 +12,11 @@ class Sale extends Model
     protected $guarded = [];
     use HasFactory;
 
-    public function items() {
-        return $this->hasMany(SaleItem::class);
-    }
+// app/Models/Sale.php
+public function items()
+{
+    return $this->hasMany(SaleItem::class, 'sale_id');
+}
 
     public function customer() {
         return $this->belongsTo(Customer::class);
@@ -28,4 +30,6 @@ class Sale extends Model
     public function ledgerEntries() {
         return $this->hasMany(Ledger::class, 'reference_id')->where('reference_type', 'Sale');
     }
+
+
 }
