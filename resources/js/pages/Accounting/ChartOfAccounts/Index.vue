@@ -1,7 +1,7 @@
 <script setup>
-import { useForm, Head } from '@inertiajs/vue3';
+import { useForm, Head, Link } from '@inertiajs/vue3';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { Plus, ListTree } from 'lucide-vue-next';
+import { LibraryBig, Plus, ListTree } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps({ accounts: Array });
@@ -73,20 +73,31 @@ const submit = () => {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
-                        <tr v-for="acc in accounts" :key="acc.id" class="hover:bg-slate-50/50">
-                            <td class="p-5 font-mono font-bold text-blue-600">{{ acc.code }}</td>
-                            <td class="p-5 font-bold text-slate-700">{{ acc.name }}</td>
-                            <td class="p-5">
-                                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase"
-                                      :class="acc.type === 'Asset' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'">
-                                    {{ acc.type }}
-                                </span>
-                            </td>
-                            <td class="p-5 text-right">
-                                <Link :href="`/accounting/ledger/${acc.id}`" class="text-blue-600 font-bold hover:underline">View Ledger</Link>
-                            </td>
-                        </tr>
-                    </tbody>
+    <tr v-for="acc in accounts" :key="acc.id" class="hover:bg-slate-50/50 transition-colors">
+        <td class="p-5 font-mono font-bold text-blue-600 text-sm">{{ acc.code }}</td>
+        <td class="p-5">
+            <div class="font-bold text-slate-700">{{ acc.name }}</div>
+            <div class="text-[10px] text-slate-400 uppercase font-black tracking-tighter">{{ acc.type }}</div>
+        </td>
+        <td class="p-5">
+            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase border"
+                :class="{
+                    'bg-emerald-50 text-emerald-700 border-emerald-100': acc.type === 'Asset' || acc.type === 'Revenue',
+                    'bg-amber-50 text-amber-700 border-amber-100': acc.type === 'Liability' || acc.type === 'Expense',
+                    'bg-purple-50 text-purple-700 border-purple-100': acc.type === 'Equity'
+                }">
+                {{ acc.type }}
+            </span>
+        </td>
+        <td class="p-5 text-right">
+            <Link :href="`/accounting/ledger/${acc.id}`"
+                  class="inline-flex items-center gap-2 bg-slate-100 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-sm font-bold text-slate-600 transition-all">
+                <LibraryBig class="w-4 h-4" />
+                View Ledger
+            </Link>
+        </td>
+    </tr>
+</tbody>
                 </table>
             </div>
         </div>

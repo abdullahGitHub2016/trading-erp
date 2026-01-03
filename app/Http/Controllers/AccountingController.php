@@ -22,6 +22,20 @@ class AccountingController extends Controller
         ]);
     }
 
+    public function indexLedger()
+{
+    return Inertia::render('Accounting/Ledger/Index', [
+        'accounts' => ChartOfAccount::orderBy('code')->get()
+    ]);
+}
+public function showJournal($id)
+{
+    $journal = Journal::with(['ledgers.account'])->findOrFail($id);
+
+    return Inertia::render('Accounting/Journals/Show', [
+        'journal' => $journal
+    ]);
+}
     public function storeCOA(Request $request)
     {
         $request->validate([

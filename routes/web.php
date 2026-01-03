@@ -103,8 +103,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/accounting/journals', [AccountingController::class, 'indexJournal']);
     Route::get('/accounting/journals/create', [AccountingController::class, 'createJournal']);
     Route::post('/accounting/journals', [AccountingController::class, 'storeJournal']);
-
+    Route::get('/accounting/journals/{id}', [AccountingController::class, 'showJournal']);
     // Ledger
+    // Add this ABOVE the {id} route
+    Route::get('/accounting/ledger', [AccountingController::class, 'indexLedger']);
     Route::get('/accounting/ledger/{id}', [AccountingController::class, 'showLedger']);
 });
 
