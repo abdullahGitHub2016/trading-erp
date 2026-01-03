@@ -9,11 +9,10 @@ import {
     LogOut,
     ChevronLeft,
     ChevronRight,
-    AlertTriangle,
-    X,
     ShoppingCart,
     ShoppingBag,
-    ReceiptText
+    BarChart3,
+    Scale
 } from 'lucide-vue-next';
 
 import Toast from '@/components/Toast.vue';
@@ -67,15 +66,10 @@ const isUrlActive = (path: string): boolean => {
 </script>
 
 <template>
-
-    <!--     <div class="debug-box bg-black text-green-400 p-4 m-4 text-xs overflow-auto max-h-40">
-        <strong>Permissions:</strong>
-        <pre>{{ page.props.auth.user.permissions }}</pre>
-    </div> -->
     <div class="min-h-screen bg-slate-50 flex">
         <aside v-if="isAuthenticated" :class="[
             isExpanded ? 'w-64' : 'w-20',
-            'bg-white border-r min-h-screen transition-all duration-300 flex flex-col'
+            'bg-white border-r min-h-screen transition-all duration-300 flex flex-col shadow-sm'
         ]">
             <div class="h-16 flex items-center justify-between px-4 border-b text-blue-600">
                 <div v-if="isExpanded" class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
@@ -95,40 +89,57 @@ const isUrlActive = (path: string): boolean => {
                 </button>
             </div>
 
-            <nav class="p-4 space-y-2 flex-1 overflow-hidden">
+            <nav class="p-4 space-y-1 flex-1 overflow-y-auto">
+                <p v-if="isExpanded" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Main Menu</p>
+
                 <Link href="/dashboard"
-                    :class="[isUrlActive('/dashboard') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    :class="[isUrlActive('/dashboard') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50', 'flex items-center gap-3 p-2 rounded-lg transition-all font-medium group']">
                     <LayoutDashboard class="w-5 h-5 shrink-0" />
-                    <span v-if="isExpanded" class="whitespace-nowrap">Dashboard</span>
+                    <span v-if="isExpanded">Dashboard</span>
                 </Link>
 
                 <Link v-if="page.props.auth.user.permissions.includes('product.view')" href="/products"
-                    :class="[isUrlActive('/products') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    :class="[isUrlActive('/products') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50', 'flex items-center gap-3 p-2 rounded-lg transition-all font-medium group']">
                     <Package class="w-5 h-5 shrink-0" />
-                    <span v-if="isExpanded" class="whitespace-nowrap">Products</span>
+                    <span v-if="isExpanded">Products</span>
                 </Link>
 
                 <Link v-if="page.props.auth.user.permissions.includes('purchase.view')" href="/purchases"
-                    :class="[isUrlActive('/purchases') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    :class="[isUrlActive('/purchases') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50', 'flex items-center gap-3 p-2 rounded-lg transition-all font-medium group']">
                     <ShoppingCart class="w-5 h-5 shrink-0" />
-                    <span v-if="isExpanded" class="whitespace-nowrap">Purchases</span>
+                    <span v-if="isExpanded">Purchases</span>
                 </Link>
 
-                <Link v-if="page.props.auth.user.permissions.includes('supplier.view')" href="/suppliers"
-                    :class="[isUrlActive('/suppliers') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
-                    <Truck class="w-5 h-5 shrink-0" />
-                    <span v-if="isExpanded" class="whitespace-nowrap">Suppliers</span>
-                </Link>
                 <Link v-if="page.props.auth.user.permissions.includes('sale.view')" href="/sales"
-                    :class="[isUrlActive('/sales') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
+                    :class="[isUrlActive('/sales') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50', 'flex items-center gap-3 p-2 rounded-lg transition-all font-medium group']">
                     <ShoppingBag class="w-5 h-5 shrink-0" />
-                    <span v-if="isExpanded" class="whitespace-nowrap">Sales</span>
+                    <span v-if="isExpanded">Sales</span>
                 </Link>
-                <Link v-if="page.props.auth.user.permissions.includes('role.manage')" href="/admin/roles"
-                    :class="[isUrlActive('/admin/roles') ? 'bg-slate-100 text-blue-600' : 'text-slate-700 hover:bg-slate-100', 'flex items-center gap-3 p-2 rounded transition-all group']">
-                    <Shield class="w-5 h-5 shrink-0" />
-                    <span v-if="isExpanded" class="whitespace-nowrap">Roles & Permissions</span>
-                </Link>
+
+                <div class="pt-4">
+                    <p v-if="isExpanded" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Final Accounts</p>
+
+                    <Link href="/reports/trial-balance"
+                        :class="[isUrlActive('/reports/trial-balance') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50', 'flex items-center gap-3 p-2 rounded-lg transition-all font-medium group']">
+                        <Scale class="w-5 h-5 shrink-0 text-slate-400 group-hover:text-blue-600" />
+                        <span v-if="isExpanded">Trial Balance</span>
+                    </Link>
+
+                    <Link href="/reports/income-statement"
+                        :class="[isUrlActive('/reports/income-statement') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50', 'flex items-center gap-3 p-2 rounded-lg transition-all font-medium group']">
+                        <BarChart3 class="w-5 h-5 shrink-0 text-slate-400 group-hover:text-blue-600" />
+                        <span v-if="isExpanded">Profit & Loss</span>
+                    </Link>
+                </div>
+
+                <div class="pt-4">
+                    <p v-if="isExpanded" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Settings</p>
+                    <Link v-if="page.props.auth.user.permissions.includes('role.manage')" href="/admin/roles"
+                        :class="[isUrlActive('/admin/roles') ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50', 'flex items-center gap-3 p-2 rounded-lg transition-all font-medium group']">
+                        <Shield class="w-5 h-5 shrink-0" />
+                        <span v-if="isExpanded">Roles & Permissions</span>
+                    </Link>
+                </div>
             </nav>
         </aside>
 

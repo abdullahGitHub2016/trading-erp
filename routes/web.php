@@ -9,7 +9,7 @@ use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
-
+use App\Http\Controllers\ReportController;
 
 
 
@@ -69,26 +69,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // THIS IS THE MISSING PIECE: It handles the PUT request to update permissions
         // The {role} parameter must match what you send from the frontend
-        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');    });
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    });
 
-        // Product Routes
-        Route::resource('products', ProductController::class);
+    // Product Routes
+    Route::resource('products', ProductController::class);
 
-        // New Purchase Routes
-        Route::resource('purchases', PurchaseController::class);
+    // New Purchase Routes
+    Route::resource('purchases', PurchaseController::class);
 
-        // New Supplier Routes
-        Route::resource('suppliers', SupplierController::class);
+    // New Supplier Routes
+    Route::resource('suppliers', SupplierController::class);
 
-        // New Supplier Routes
-        Route::resource('suppliers', SupplierController::class);
+    // New Supplier Routes
+    Route::resource('suppliers', SupplierController::class);
 
-                // New Supplier Routes
-        Route::resource('sales', SaleController::class);
+    // New Supplier Routes
+    Route::resource('sales', SaleController::class);
 
+    // Accounting Reports
+    Route::get('/reports/trial-balance', [ReportController::class, 'trialBalance'])->name('reports.trial_balance');
+    Route::get('/reports/income-statement', [ReportController::class, 'incomeStatement'])->name('reports.income_statement');
 });
 
 
 
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
