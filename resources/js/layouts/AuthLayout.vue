@@ -131,6 +131,21 @@ const isUrlActive = (path: string): boolean => {
                         <span v-if="isExpanded">Profit & Loss</span>
                     </Link>
                 </div>
+                <div class="pt-4">
+    <p v-if="isExpanded" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Bookkeeping</p>
+
+    <Link href="/accounting/chart-of-accounts"
+        class="flex items-center gap-3 p-2 rounded-lg text-slate-600 hover:bg-slate-50 font-medium">
+        <Shield class="w-5 h-5 shrink-0" />
+        <span v-if="isExpanded">Chart of Accounts</span>
+    </Link>
+
+    <Link href="/accounting/journals"
+        class="flex items-center gap-3 p-2 rounded-lg text-slate-600 hover:bg-slate-50 font-medium">
+        <ReceiptText class="w-5 h-5 shrink-0" />
+        <span v-if="isExpanded">Journal Vouchers</span>
+    </Link>
+</div>
 
                 <div class="pt-4">
                     <p v-if="isExpanded" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">Settings</p>

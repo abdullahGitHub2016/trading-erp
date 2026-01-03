@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AccountingController;
 
 
 
@@ -92,6 +93,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports/income-statement', [ReportController::class, 'incomeStatement'])->name('reports.income_statement');
 });
 
+
+Route::middleware(['auth'])->group(function () {
+    // Chart of Accounts
+    Route::get('/accounting/chart-of-accounts', [AccountingController::class, 'indexCOA']);
+    Route::post('/accounting/chart-of-accounts', [AccountingController::class, 'storeCOA']);
+
+    // Journals
+    Route::get('/accounting/journals', [AccountingController::class, 'indexJournal']);
+    Route::get('/accounting/journals/create', [AccountingController::class, 'createJournal']);
+    Route::post('/accounting/journals', [AccountingController::class, 'storeJournal']);
+
+    // Ledger
+    Route::get('/accounting/ledger/{id}', [AccountingController::class, 'showLedger']);
+});
 
 
 
